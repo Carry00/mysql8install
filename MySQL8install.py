@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import os
-import fileinput
-import subprocess
-import commands
-import getopt
+
 import sys
 
 reload(sys)
-
+import getopt
+import commands
+import subprocess
+import fileinput
+import os
 
 INFO = "\033[1;33;40m%s\033[0m"
 ERROR = "\033[1;31;40m%s\033[0m"
@@ -31,7 +31,7 @@ def CheckAndHelp(project_name, option):
 
                 python %s install --instance-ports=3366 --innodb-buffer-pool-size=1G
 
-            ''' % project_name
+            '''% project_name
     configure_usage = ''' 
             '''
 
@@ -44,15 +44,12 @@ def CheckAndHelp(project_name, option):
             '''
 
     if option == "install" or option is None:
-        usage = usage_help + "\n" + example + "\n" + \
-            install_usage + "\n" + configure_usage
+        usage = usage_help + "\n" + example + "\n" + install_usage + "\n" + configure_usage
         return usage
 
     else:
-        usage = usage_help + "\n" + example + "\n" + \
-            install_usage + "\n" + configure_usage
+        usage = usage_help + "\n" + example + "\n" + install_usage + "\n" + configure_usage
         return usage
-
 
 def CheckArgv(argvs):
     check_start_message = "Check Argument Start . . ."
@@ -83,8 +80,7 @@ def CheckArgv(argvs):
     except getopt.GetoptError, err:
         # print err
         err_msg = "     use -h or -help check"
-        result_dic = {'result_state': 'false',
-                      'result': str(err) + "\n\n" + err_msg}
+        result_dic = {'result_state': 'false', 'result': str(err) + "\n\n" + err_msg}
 
     # print result_dic
     return result_dic
@@ -116,25 +112,21 @@ def CreateConfigurationFiles(configure):
     tmp_table_size = '128M'
     max_heap_table_size = '128M'
     wait_timeout = '3600'
-    system_free_memory = commands.getstatusoutput(
-        "cat /proc/meminfo | grep MemFree|awk '{print $(NF-1)}'")[1]
+    system_free_memory = commands.getstatusoutput("cat /proc/meminfo | grep MemFree|awk '{print $(NF-1)}'")[1]
     # system_total_memory = '1048576'
-    system_total_memory = commands.getstatusoutput(
-        "cat /proc/meminfo | grep MemTotal|awk '{print $(NF-1)}'")[1]
+    system_total_memory = commands.getstatusoutput("cat /proc/meminfo | grep MemTotal|awk '{print $(NF-1)}'")[1]
     sort_buffer_size = '16M'
     # innodb_buffer_pool_size = '128M'
     innodb_buffer_pool_size = '%sM' % int((int(system_free_memory) / 1024 - int(key_buffer_size[:-1]) - int(
         max_connections) * (int(sort_buffer_size[:-1]) + int(read_buffer_size[:-1]) + int(
-            binlog_cache_size[:-1])) - int(max_connections) - int(max_binlog_size[:-1]) - int(tmp_table_size[:-1])) * 0.95)
+        binlog_cache_size[:-1])) - int(max_connections) - int(max_binlog_size[:-1]) - int(tmp_table_size[:-1])) * 0.95)
     if int(innodb_buffer_pool_size[:-1]) < 0:
         innodb_buffer_pool_size = '512M'
-    cpu_core = commands.getstatusoutput(
-        "cat /proc/cpuinfo | grep processor | wc -l")[1]
+    cpu_core = commands.getstatusoutput("cat /proc/cpuinfo | grep processor | wc -l")[1]
     # innodb_thread_concurrency = '8'
     # innodb_write_io_threads = '4'
     # innodb_read_io_threads = '4'
-    r1 = commands.getstatusoutput(
-        """ ip a|grep 'scope global'|awk -F[:' '/]+ '{print $3}'|grep -v ^127|tail -1 """)[1].split('.')[2:]
+    r1 = commands.getstatusoutput(""" ip a|grep 'scope global'|awk -F[:' '/]+ '{print $3}'|grep -v ^127|tail -1 """)[1].split('.')[2:]
     server_id = "".join(r1)
     innodb_thread_concurrency = '%s' % (int(cpu_core) * 2)
     innodb_write_io_threads = '%s' % (int(cpu_core))
@@ -250,10 +242,8 @@ def CheckReplaceFile(configure_dic):
     print INFO % check_environment_start_message
     print LINE
 
-    data_file_path = "%s/mysql%s" % (
-        configure_dic['--data-prefix'], configure_dic['--instance-ports'])
-    log_file_path = "%s/mysql%s" % (
-        configure_dic['--log-prefix'], configure_dic['--instance-ports'])
+    data_file_path = "%s/mysql%s" % (configure_dic['--data-prefix'], configure_dic['--instance-ports'])
+    log_file_path = "%s/mysql%s" % (configure_dic['--log-prefix'], configure_dic['--instance-ports'])
     local_file = 'my.cnf'
     # if os.path.exists(configure_dic['--base-prefix']):
     #     pass
@@ -264,8 +254,7 @@ def CheckReplaceFile(configure_dic):
     if os.path.exists(configure_dic['--data-prefix']):
         pass
     else:
-        commands.getstatusoutput("mkdir -p %s" %
-                                 configure_dic['--data-prefix'])
+        commands.getstatusoutput("mkdir -p %s" % configure_dic['--data-prefix'])
         msg = "The Path: %s Create Success" % configure_dic['--data-prefix']
         print LINE
         print NOTICE % msg
@@ -324,8 +313,7 @@ def CheckReplaceFile(configure_dic):
     print LINE
     print INFO % create_file_start_message
     print LINE
-    cp_file = commands.getstatusoutput(
-        "cp -fr %s  %s" % (local_file, data_file_path))
+    cp_file = commands.getstatusoutput("cp -fr %s  %s" % (local_file, data_file_path))
     if int(cp_file[0]) == 0:
         pass
     else:
@@ -347,8 +335,7 @@ def CheckReplaceFile(configure_dic):
 
 
 def InstallMysql(install_cfg, filename):
-    install_start_message = "Install MySQL Start Port: %s. . ." % install_cfg[
-        '--instance-ports']
+    install_start_message = "Install MySQL Start Port: %s. . ." % install_cfg['--instance-ports']
     print LINE
     print INFO % install_start_message
     print LINE
@@ -356,29 +343,25 @@ def InstallMysql(install_cfg, filename):
     #rootpwd = "root"
     mysql_conf_name = "my.cnf"
     old_mysql_file = "/etc/my.cnf"
-    data_file_path = "%s/mysql%s" % (
-        install_cfg['--data-prefix'], install_cfg['--instance-ports'])
-    log_file_path = "%s/mysql%s" % (
-        install_cfg['--log-prefix'], install_cfg['--instance-ports'])
-    data_dir = ['data', 'mysqltmp', 'filedir']
+    data_file_path = "%s/mysql%s" % (install_cfg['--data-prefix'], install_cfg['--instance-ports'])
+    log_file_path = "%s/mysql%s" % (install_cfg['--log-prefix'], install_cfg['--instance-ports'])
+    data_dir = ['data','mysqltmp','filedir']
     log_dir = ['binlogs', 'slowlogs', 'relaylogs']
     install_dir = "/usr/local/"
     mysql_src_tar = filename
-    mysql_src_name = mysql_src_tar.replace(".tar", "").strip()
+    mysql_src_name = mysql_src_tar.replace(".tar","").strip()
     print mysql_src_tar, mysql_src_name
     mysql_run_script = 'mysql'
     mysql_safe_file = '%s/bin/mysqld_safe' % install_cfg['--base-prefix']
     mysql_conf_file = os.path.join(data_file_path, mysql_conf_name)
     mysql_run_file = os.path.join(data_file_path, mysql_run_script)
     sys_run_file = "/etc/init.d/mysql%s" % install_cfg['--instance-ports']
-    mysql_sock = "%s/mysql%s/mysql%s.sock" % (
-        install_cfg['--data-prefix'], install_cfg['--instance-ports'], install_cfg['--instance-ports'])
+    mysql_sock = "%s/mysql%s/mysql%s.sock" % (install_cfg['--data-prefix'], install_cfg['--instance-ports'], install_cfg['--instance-ports'])
 
     if os.path.exists(install_cfg['--base-prefix']) and os.path.exists(os.path.join(install_dir, mysql_src_name)):
         pass
     else:
-        tar_mysql = commands.getstatusoutput(
-            "tar xvf %s -C %s" % (mysql_src_tar, install_dir))
+        tar_mysql = commands.getstatusoutput("tar xvf %s -C %s" % (mysql_src_tar, install_dir))
         if int(tar_mysql[0]) == 0:
             commands.getstatusoutput(
                 "ln -s %s %s" % (os.path.join(install_dir, mysql_src_name), install_cfg['--base-prefix']))
@@ -414,8 +397,7 @@ def InstallMysql(install_cfg, filename):
     if os.path.exists('/lib64/libaio.so.1'):
         pass
     else:
-        libaio_install = commands.getstatusoutput(
-            "yum install libaio-devel libaio numactl -y")
+        libaio_install = commands.getstatusoutput("yum install libaio-devel libaio numactl -y")
         if int(libaio_install[0]) != 0:
             msg = "[Error]: Failed To Install Libaio"
             print LINE_ERROR
@@ -423,12 +405,21 @@ def InstallMysql(install_cfg, filename):
             print LINE_ERROR
             sys.exit()
 
-    commands.getstatusoutput("sed -i 's#/usr/local/mysql#'%s'#g' %s" %
-                             (install_cfg['--base-prefix'], mysql_safe_file))
+    if os.path.exists('/usr/lib64/libnuma.so.1'):
+        pass
+    else:
+        libaio_install = commands.getstatusoutput("yum install numactl -y")
+        if int(libaio_install[0]) != 0:
+            msg = "[Error]: Failed To Install numactl"
+            print LINE_ERROR
+            print ERROR % msg
+            print LINE_ERROR
+            sys.exit()
+
+    commands.getstatusoutput("sed -i 's#/usr/local/mysql#'%s'#g' %s" % (install_cfg['--base-prefix'], mysql_safe_file))
 
     if os.path.exists(old_mysql_file):
-        commands.getstatusoutput("mv %s %s.bak" %
-                                 (old_mysql_file, old_mysql_file))
+        commands.getstatusoutput("mv %s %s.bak" % (old_mysql_file, old_mysql_file))
 
     for data in data_dir:
         commands.getstatusoutput("mkdir -p %s/%s" % (data_file_path, data))
@@ -436,15 +427,12 @@ def InstallMysql(install_cfg, filename):
     for log in log_dir:
         commands.getstatusoutput("mkdir -p %s/%s" % (log_file_path, log))
 
-    commands.getstatusoutput("cp -fr %s %s" %
-                             (mysql_run_script, data_file_path))
+    commands.getstatusoutput("cp -fr %s %s" % (mysql_run_script, data_file_path))
     commands.getstatusoutput("chown -R mysql.mysql %s" % data_file_path)
     commands.getstatusoutput("chown -R mysql.mysql %s" % log_file_path)
 
-    commands.getstatusoutput(
-        "sed -i 's#{MYCNF-DIR}#'%s'#g' %s" % (mysql_conf_file, mysql_run_file))
-    commands.getstatusoutput(
-        "sed -i 's#{BIN-DIR}#'%s/bin'#g' %s" % (install_cfg['--base-prefix'], mysql_run_file))
+    commands.getstatusoutput("sed -i 's#{MYCNF-DIR}#'%s'#g' %s" % (mysql_conf_file, mysql_run_file))
+    commands.getstatusoutput("sed -i 's#{BIN-DIR}#'%s/bin'#g' %s" % (install_cfg['--base-prefix'], mysql_run_file))
     commands.getstatusoutput(
         "sed -i 's#{PID-DIR}#'%s/mysql%s.pid'#g' %s" % (log_file_path, install_cfg['--instance-ports'], mysql_run_file))
     commands.getstatusoutput("cp -fr %s %s" % (mysql_run_file, sys_run_file))
@@ -452,15 +440,11 @@ def InstallMysql(install_cfg, filename):
 
     commands.getstatusoutput("chmod 700 %s" % sys_run_file)
 
-    commands.getstatusoutput("/sbin/chkconfig add mysql%s" %
-                             install_cfg['--base-prefix'])
-    commands.getstatusoutput("/sbin/chkconfig mysql%s on" %
-                             install_cfg['--base-prefix'])
-    commands.getstatusoutput(
-        "find %s -name mysql -exec chmod 700 {} \;" % data_file_path)
+    commands.getstatusoutput("/sbin/chkconfig add mysql%s" % install_cfg['--base-prefix'])
+    commands.getstatusoutput("/sbin/chkconfig mysql%s on" % install_cfg['--base-prefix'])
+    commands.getstatusoutput("find %s -name mysql -exec chmod 700 {} \;" % data_file_path)
 
-    mysql_value = commands.getstatusoutput(
-        "grep -w mysql%s /etc/profile | wc -l" % install_cfg['--instance-ports'])
+    mysql_value = commands.getstatusoutput("grep -w mysql%s /etc/profile | wc -l" % install_cfg['--instance-ports'])
     if int(mysql_value[1]) == 0:
         commands.getstatusoutput("echo alias mysql%s='\"'%s/bin/mysql --defaults-file=%s -S %s'\"' >> /etc/profile" % (
             install_cfg['--instance-ports'], install_cfg['--base-prefix'], mysql_conf_file, mysql_sock))
@@ -476,7 +460,7 @@ def InstallMysql(install_cfg, filename):
     print LINE
     MYSTR = "%s/bin/mysqld --defaults-file=%s --basedir=%s  --user=mysql --initialize --explicit_defaults_for_timestamp  >/dev/null" % (
         install_cfg['--base-prefix'], mysql_conf_file, install_cfg['--base-prefix'])
-    print INFO % MYSTR
+    print INFO % MYSTR                                                                    
     # mysql_initialize = commands.getstatusoutput()
     scommand = "%s/bin/mysqld --defaults-file=%s --basedir=%s  --user=mysql --initialize --explicit_defaults_for_timestamp " % (
         install_cfg['--base-prefix'], mysql_conf_file, install_cfg['--base-prefix'])
@@ -505,7 +489,7 @@ def InstallMysql(install_cfg, filename):
     print "the sys_run_file is %s" % sys_run_file
     mysql_start = subprocess.call([sys_run_file, 'start'])
     print "start print mysql_start"
-    if mysql_start > 0:
+    if mysql_start> 0:
         print "MySQL failed to start on %s" % install_cfg['--instance-ports']
         sys.exit()
     mysql_finish_message = "MySQL Start Finish"
@@ -513,23 +497,22 @@ def InstallMysql(install_cfg, filename):
     print INFO % mysql_finish_message
     print LINE
 
-    mysql_privileges_start_message = "Cfg MySQL(%s) Privileges Start . . ." % install_cfg[
-        '--instance-ports']
+    mysql_privileges_start_message = "Cfg MySQL(%s) Privileges Start . . ." % install_cfg['--instance-ports']
     print LINE
     print INFO % mysql_privileges_start_message
     print LINE
-    a = """ grep 'temporary password' %s/error.log |sed 's/.*root@localhost: //' """ % (
-        log_file_path)
-    password_temp = commands.getstatusoutput(a)[1]
+    a=""" grep 'temporary password' %s/error.log |sed 's/.*root@localhost: //' """%(log_file_path)
+    password_temp=commands.getstatusoutput(a)[1]
     #print password_temp
     password = 'openssl rand -base64 20'
     b = commands.getoutput(password)
     rootpwd = b
-    scommand = """
-/usr/sbin/lsof -i :%s &>/dev/null && %s/bin/mysql --connect-expired-password --socket=%s -u root -p"%s" -e "SET SQL_LOG_BIN=0;alter user 'root'@'localhost' identified by '%s';SET SQL_LOG_BIN=1;"
-    """ % (install_cfg['--instance-ports'], install_cfg['--base-prefix'], mysql_sock, password_temp, rootpwd)
-    print scommand
-    cfg_mysql_privileges = subprocess.call(scommand, shell=True)
+    scommand="""
+/usr/sbin/lsof -i :%s &>/dev/null && %s/bin/mysql --connect-expired-password --socket=%s -u root -p"%s" -e "alter user 'root'@'localhost' identified by '%s';" 2>/dev/null
+    """ % (install_cfg['--instance-ports'], install_cfg['--base-prefix'], mysql_sock,password_temp,rootpwd)
+    msg = 'password: '  + rootpwd
+    print ERROR % msg
+    cfg_mysql_privileges=subprocess.call(scommand, shell=True)
     if cfg_mysql_privileges > 0:
         msg = "[Error]: Failed to set MySQL root password! Please do it manually."
         print LINE_ERROR
@@ -537,27 +520,13 @@ def InstallMysql(install_cfg, filename):
         print ERROR % msg
         print LINE_ERROR
         sys.exit()
-    # cfg_mysql_privileges = commands.getstatusoutput(
-    #     "/usr/sbin/lsof -i :%s &>/dev/null && %s/bin/mysqladmin -u root password '%s' -S %s >/dev/null 2>&1" % (
-    #         install_cfg['--instance-ports'], install_cfg['--base-prefix'], rootpwd, mysql_sock))
-    # /usr/local/mysql/ bin / mysqladmin - uroot - p 'jSh#jXtkC6i8'  password  'root' - -socket = / data / db / mysql3306 / mysql3306.sock
-    # if int(cfg_mysql_privileges[0]) != 0:
-    #     print cfg_mysql_privileges[1]
-    #     msg = "[Error]: Failed to set MySQL root password! Please do it manually."
-    #     print LINE_ERROR
-    #     print ERROR % cfg_mysql_privileges[1]
-    #     print ERROR % msg
-    #     print LINE_ERROR
-    #     sys.exit()
 
-    mysql_privileges_finish_message = "Cfg MySQL(%s) Privileges Finish" % install_cfg[
-        '--instance-ports']
+    mysql_privileges_finish_message = "Cfg MySQL(%s) Privileges Finish" % install_cfg['--instance-ports']
     print LINE
     print INFO % mysql_privileges_finish_message
     print LINE
 
-    check_mysql_start_message = "Check MySQL(%s) Connected to port Start" % install_cfg[
-        '--instance-ports']
+    check_mysql_start_message = "Check MySQL(%s) Connected to port Start" % install_cfg['--instance-ports']
     print LINE
     print INFO % check_mysql_start_message
     print LINE
@@ -579,8 +548,7 @@ def InstallMysql(install_cfg, filename):
         print NOTICE % msg
         print LINE
 
-    check_mysql_finish_message = "Check MySQL(%s) Connected to port Finish" % install_cfg[
-        '--instance-ports']
+    check_mysql_finish_message = "Check MySQL(%s) Connected to port Finish" % install_cfg['--instance-ports']
     print LINE
     print INFO % check_mysql_finish_message
     print LINE
@@ -599,8 +567,7 @@ def InstallMysql(install_cfg, filename):
     print INFO % create_user_finish_message
     print LINE
 
-    install_rpl_start_message = "Install rpl_semi_sync on %s  Start.... " % install_cfg[
-        '--instance-ports']
+    install_rpl_start_message = "Install rpl_semi_sync on %s  Start.... " % install_cfg['--instance-ports']
     print LINE
     print INFO % install_rpl_start_message
     print LINE
@@ -616,8 +583,7 @@ def InstallMysql(install_cfg, filename):
         print ERROR % msg
         print LINE_ERROR
         sys.exit()
-    install_rpl_finish_message = "Install rpl_semi_sync on %s  Finish.... " % install_cfg[
-        '--instance-ports']
+    install_rpl_finish_message = "Install rpl_semi_sync on %s  Finish.... " % install_cfg['--instance-ports']
     print LINE
     print INFO % install_rpl_finish_message
     print LINE
@@ -640,24 +606,21 @@ if __name__ == '__main__':
     check_argv = sys.argv[2:]
     #print check_argv
     if "--instance-ports" not in str(check_argv) or "--innodb-buffer-pool-size" not in str(check_argv):
-        print "python %s install --instance-ports=3366 --innodb-buffer-pool-size=1G" % sys.argv[0]
+        print "python %s install --instance-ports=3366 --innodb-buffer-pool-size=1G"%sys.argv[0]
         sys.exit()
 
-    filename = 'mysql-8.0.23-linux-glibc2.17-x86_64-minimal.tar.xz'
-
-    filename2 = 'mysql-8.0.23-linux-glibc2.17-x86_64-minimal.tar'
+    filename = 'GreatSQL-8.0.32-24-Linux-glibc2.17-x86_64.tar.xz'
+    filename2 = 'GreatSQL-8.0.32-24-Linux-glibc2.17-x86_64.tar'
     if not os.path.exists(filename2):
         if not os.path.exists(filename):
-            msg = "%s not exists!" % filename
+            msg = "%s not exists!"%filename
             print LINE_ERROR
             print ERROR % msg
-            #print "wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.20-linux-glibc2.12-x86_64.tar.xz"
-            print "wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.23-linux-glibc2.17-x86_64-minimal.tar.xz"
             print LINE_ERROR
             sys.exit()
         else:
             commands.getstatusoutput("xz -d %s" % (filename))
-
+        
     check_result = CheckArgv(check_argv)
     if check_result['result_state'] == "false":
         print check_result['result']
