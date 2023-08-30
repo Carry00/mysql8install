@@ -83,7 +83,46 @@ for choice in $choices; do
 
         python2.7 MySQL8install.py install --instance-ports="$mysql_port" --innodb-buffer-pool-size="$buffer_pool"
 
+        MYSQLD_OPTS="--defaults-file=/data/db/mysql${mysql_port}/my.cnf"
+        THP_SETTING="never"
+        cat >/usr/lib/systemd/system/mysql${mysql_port}.service <<EOF
+[Unit]
+Description=MySQL Server
+Documentation=man:mysqld(8)
+Documentation=http://dev.mysql.com/doc/refman/en/using-systemd.html
+After=network.target
+After=syslog.target
+After=local-fs.target remote-fs.target
+Requires=local-fs.target remote-fs.target
+[Install]
+WantedBy=multi-user.target
+Alias=mysql.service
+[Service]
+User=mysql
+Group=mysql
+Type=notify
+TimeoutSec=0
+PermissionsStartOnly=true
+ExecStartPre=/usr/local/mysql/bin/mysqld_pre_systemd
+ExecStart=/usr/local/mysql/bin/mysqld $MYSQLD_OPTS
+EnvironmentFile=-/etc/sysconfig/mysql${mysql_port}
+LimitNOFILE = 65535
+Restart=on-failure
+RestartPreventExitStatus=1
+Environment=MYSQLD_PARENT_PID=1
+PrivateTmp=false
+EOF
+        echo "MYSQLD_OPTS="$MYSQLD_OPTS >/etc/sysconfig/mysql${mysql_port}
+        echo "THP_SETTING="$THP_SETTING >>/etc/sysconfig/mysql${mysql_port}
+        /etc/init.d/mysql${mysql_port} stop 
+        rm -f '/etc/init.d/mysql'${mysql_port};
+        systemctl daemon-reload
+        systemctl enable 'mysql'${mysql_port}'.service'
+        systemctl start 'mysql'${mysql_port}'.service'
+        wait
+        systemctl status 'mysql'${mysql_port}'.service'
         ;;
+
 
     \
         1) # 安装Kafka
